@@ -43,7 +43,7 @@ class dbConnect:
 if __name__ == "__main__":
     import pandas as pd
     s = dbConnect('gcaassetmgmt_2_0')
-    connect = s.connection()
-    query = f"CALL rep_uspNewStaffTerms"
-    result = pd.read_sql(query, connect)
-    print(result)
+    conn = s.connection()
+    shipDataQuery = f"SELECT * FROM gcaassetmgmt_2_0.ship_vwaddressvalidation"
+    shipData = pd.read_sql(shipDataQuery, conn)
+    print(shipData)

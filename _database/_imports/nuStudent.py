@@ -213,9 +213,12 @@ for student_fileName_relative in glob.glob(f'Z:/*SCA_21-22_Final{noHyphenDate}*'
 
         print('starting update to SQL')
 
-        connect = dbConnect("gcaassetmgmt_2_0")
-        connect.df_to_sql(df2, 'stage_studentdata_test')
-        #connect.call('pers.uspupdatestudentdata')
+        gcaAssetMGMT = dbConnect("gcaassetmgmt_2_0")
+        gcaAssetMGMT.df_to_sql(df2, 'stage_studentdata_test')
+        gcaAssetMGMT.call('CALL pers_uspupdatestudentdata')
+        gcaAssetMGMT.call('CALL asset_uspreassigndevs2youngestest(')
+        gcaAssetMGMT.call('CALL asset_uspcbreassign2esfromwd')
+        gcaAssetMGMT.call('CALL asset_uspes_sib_kitdist')
 
         toc = time.time()
         print('Done in {:.4f} seconds'.format(toc - tic))

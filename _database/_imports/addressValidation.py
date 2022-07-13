@@ -16,7 +16,6 @@ gcaAssetMGMT = dbConnect("gcaassetmgmt_2_0")
 conn = gcaAssetMGMT.connection()
 
 
-
 # List/Dict creation
 upsrows = []
 uspsrows = []
@@ -28,13 +27,13 @@ addressDictError = {}
 timeStart = 0
 
 # Map columns of DataFrame with SQL Database
-column_mapping = {'PersonID': '"PersonID"',
-                  'Address': 'Street1',
-                  'Address_2': '"Street2"',
-                  'CITY': '"City"',
-                  'STATE': 'State',
-                  'Postal_Code': 'PostalCode',
-                  'Val_Src': 'Val_Src'}
+column_mapping = {'personid': '"personid"',
+                  'address': 'street1',
+                  'address_2': '"street2"',
+                  'city': '"city"',
+                  'state': 'state',
+                  'postal_code': 'postalcode',
+                  'val_src': 'val_src'}
 
 # Retry Setup
 s = requests.Session()
@@ -198,12 +197,12 @@ def revalidation():
 
     # Second Execution
     for i in revalidationData.index:
-        pID = revalidationData['PersonID'].loc[i]
-        street = revalidationData['Address'].loc[i]
-        street2 = revalidationData['Address_2'].loc[i]
-        city = revalidationData['City'].loc[i]
-        state = revalidationData['State'].loc[i]
-        zipCode = revalidationData['Postal_Code'].loc[i]
+        pID = revalidationData['personid'].loc[i]
+        street = revalidationData['address'].loc[i]
+        street2 = revalidationData['address_2'].loc[i]
+        city = revalidationData['city'].loc[i]
+        state = revalidationData['state'].loc[i]
+        zipCode = revalidationData['postal_code'].loc[i]
 
         uspsValidation(pID, street, street2, city, state, zipCode, revaluspsrows, "reval-USPS", 1)
     print(revaluspsrows)
@@ -219,29 +218,21 @@ def main():
     # Main Execution
     for i in shipData.index:
         print(i)
-        pID = shipData['PersonID'].loc[i]
-        street = shipData['Address'].loc[i]
-        street2 = shipData['Address_2'].loc[i]
+        pID = shipData['personid'].loc[i]
+        street = shipData['address'].loc[i]
+        street2 = shipData['address_2'].loc[i]
         # if street2 != None:
         #     street = street +" "+ street2
-        city = shipData['CITY'].loc[i]
-        state = shipData['STATE'].loc[i]
-        zipCode = shipData['Postal_Code'].loc[i]
+        city = shipData['city'].loc[i]
+        state = shipData['state'].loc[i]
+        zipCode = shipData['postal_code'].loc[i]
         upsValidation(pID, street, street2, city, state, zipCode, upsrows)
 
     revalidation()
     if upsrows:
-        df = pd.DataFrame(upsrows, columns=list(column_mapping.keys())).astype(str).where(pd.notnull(upsrows),
-                                                                                          None).replace('\.0', '',
-                                                                                                        regex=True)
+        df = pd.DataFrame(upsrows, columns=list(column_mapping.keys())).astype(str).where(pd.notnull(upsrows), None).replace('\.0', '', regex=True)
         print(df)
-        with alive_bar(len(df.index)) as bar:  # Alive bar for progress
-            try:
-                for index, row in df.iterrows():
-                    conn.execute(insert_query, *row)
-                    bar()
-            except Exception as error:
-                print(error)
+        gcaAssetMGMT.df_to_sql(df, 'ship_ups_validatedaddress')
     else:
         print("Empty UPS rows found")
 
