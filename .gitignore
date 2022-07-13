@@ -1,3 +1,3 @@
 /mpConfigs/doorKey.py
-/mpConfigs/*.env
-/logs/*.log
+*.log
+*.env
