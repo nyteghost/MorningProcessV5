@@ -1,3 +1,4 @@
 /mpConfigs/doorKey.py
 *.log
 *.env
+*.xml

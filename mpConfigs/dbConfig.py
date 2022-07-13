@@ -2,9 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy import event
 from dotenv import load_dotenv
 import os
+import better_exceptions
+
 load_dotenv()
+# better_exceptions.MAX_LENGTH = None
+# better_exceptions.hook()
+
 
 connectString = os.getenv('connectString')
+
 
 class dbConnect:
     def __init__(self, database):
@@ -17,6 +23,7 @@ class dbConnect:
         def receive_before_cursor_execute(conn, cursor, statement, params, context, executemany):
             if executemany:
                 cursor.fast_executemany = True
+
         with self.conn.connect() as connection:
             dataframe.to_sql(
                 con=connection,
@@ -28,3 +35,15 @@ class dbConnect:
     def call(self, procedure):
         with self.conn.connect() as connection:
             connection.execute(f'call {procedure}')
+
+    def connection(self):
+        return self.conn
+
+
+if __name__ == "__main__":
+    import pandas as pd
+    s = dbConnect('gcaassetmgmt_2_0')
+    connect = s.connection()
+    query = 'CALL rep_uspgsuitedevstoupdateassetid'
+    result = pd.read_sql(query, connect)
+    print(result)
