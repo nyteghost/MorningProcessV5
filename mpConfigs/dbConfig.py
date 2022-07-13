@@ -1,11 +1,15 @@
 from sqlalchemy import create_engine
 from sqlalchemy import event
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
+connectString = os.getenv('connectString')
 
 class dbConnect:
     def __init__(self, database):
         self.database = database
-        self.engine = create_engine(f"mysql+pymysql://Mbrown:99Bullcalf2021@10.200.1.159:3306/{database}")
+        self.engine = create_engine(f"{connectString}/{database}")
         self.conn = self.engine.connect()
 
     def df_to_sql(self, dataframe, table):
