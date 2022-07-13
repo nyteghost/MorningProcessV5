@@ -29,7 +29,7 @@ if __name__ == "__main__":
 today = date.today()
 strtoday = str(today)
 gcaAssetMGMT = dbConnect("gcaassetmgmt_2_0")
-connect = gcaAssetMGMT.connection()
+conn = gcaAssetMGMT.connection()
 
 
 # Column Mapping
@@ -194,7 +194,7 @@ def updateRequestPoint(service, deviceID, newAsset):
 
 def updateOrgData():
     query = 'CALL isolatedsafety.dbo_uspdevstomovetostudentou'
-    result = pd.read_sql(query, connect)
+    result = pd.read_sql(query, conn)
     print(result)
     if not result.empty:
         jsonDFCall = result['JSONs']
@@ -218,7 +218,7 @@ def updateOrgData():
     print('Org Data Update Complete')
 
 def updateMain():
-    updateAsset = pd.read_sql(updateAssetquery, connect)
+    updateAsset = pd.read_sql(updateAssetquery, conn)
     for i in range(len(updateAsset)):
         deviceId = updateAsset.loc[i, 'deviceID']
         newAsset = updateAsset.loc[i, 'NewAssetID']

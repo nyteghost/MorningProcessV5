@@ -44,6 +44,6 @@ if __name__ == "__main__":
     import pandas as pd
     s = dbConnect('gcaassetmgmt_2_0')
     connect = s.connection()
-    query = 'CALL rep_uspgsuitedevstoupdateassetid'
+    query = f"CALL rep_uspNewStaffTerms"
     result = pd.read_sql(query, connect)
     print(result)
