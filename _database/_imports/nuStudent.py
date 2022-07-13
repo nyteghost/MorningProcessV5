@@ -7,10 +7,11 @@ import glob
 import shutil
 from contextlib import redirect_stderr
 import io
+import logging
 from loguru import logger
 import time
-from sqlalchemy import event
-from mpConfigs.dbConfig import con_to_db, df_to_sql
+import os
+from mpConfigs.dbConfig import dbConnect
 
 today = date.today()
 strtoday = str(today)
@@ -20,9 +21,8 @@ noHyphenDate = str(Date).replace('-', '')
 print(noHyphenDate)
 
 
-#
-# logger.disable("my_library")
-# logging.basicConfig(filename=f"./logs/nuStudent {Date}.log", level=logging.WARNING)
+logger.disable("my_library")
+logging.basicConfig(filename=f"..\\..\\logs\\nuStudent {Date}.log", level=logging.ERROR)
 
 
 def UniqueResults(dataframe):
@@ -44,7 +44,7 @@ prefix = r"C:\Users"
 localuser = getpass.getuser()
 student_sheet = r"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\CURRENT GCA Student Data.xlsx"
 to_student_sheetcsv = r"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\CURRENT GCA Student Data.csv"
-student_sheet_fromCSV = r"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\CURRENT GCA Student Data(fromCSV).xlsx"
+student_sheet_fromCSV = r"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\CURRENT GCA Student Data(from CSV).xlsx"
 output = prefix + "\\" + localuser + fr'\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\Error Reports\{today} - Student Data Duplicates.xlsx'
 extraColumnError = prefix + "\\" + localuser + fr'\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\Error Reports\{today} - Student Data Extra Column.csv'
 goodPrefixStuff = fr"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\goodStuff.csv"
@@ -213,31 +213,17 @@ for student_fileName_relative in glob.glob(f'Z:/*SCA_21-22_Final{noHyphenDate}*'
 
         print('starting update to SQL')
 
-        # tic = time.time()
-        # df_to_sql(df2)
-        # toc = time.time()
-        # print('Done in {:.4f} seconds'.format(toc-tic))
+        connect = dbConnect("gcaassetmgmt_2_0")
+        connect.df_to_sql(df2, 'stage_studentdata_test')
+        #connect.call('pers.uspupdatestudentdata')
 
-        conn = con_to_db("isolatedsafety")
-
-
-        @event.listens_for(conn, "before_cursor_execute")
-        def receive_before_cursor_execute(
-                conn, cursor, statement, params, context, executemany
-        ):
-            if executemany:
-                cursor.fast_executemany = True
-
-
-        df_to_sql(conn, df2, "stage_studentdata_test")
         toc = time.time()
         print('Done in {:.4f} seconds'.format(toc - tic))
 
         today = date.today()
         Date = today
-
-# for fileName_relative in glob.glob('Z:/*SCA_21-22_Final*', recursive=True):
-#     fileName_absolute = os.path.basename(fileName_relative)
-#     new_name = str(Date) + '-' + "nuStudentSheet.csv"
-#     shutil.move(fileName_relative, 'Z:/Historical/' + new_name)
-#     print(new_name + ' moved to Historical Folder.')
+        #
+        # fileName_absolute = os.path.basename(student_fileName_relative)
+        # new_name = str(Date) + '-' + "nuStudentSheet.csv"
+        # shutil.move(student_fileName_relative, 'Z:/Historical/' + new_name)
+        # print(new_name + ' moved to Historical Folder.')

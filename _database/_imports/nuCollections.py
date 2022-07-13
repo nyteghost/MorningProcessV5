@@ -8,7 +8,8 @@ from datetime import date
 import os
 import logging
 from loguru import logger
-from dbConfig import con_to_db, df_to_sql
+import time
+from mpConfigs.dbConfig import dbConnect
 
 today = date.today()
 strtoday = str(today)
@@ -22,16 +23,6 @@ prefix = r"C:\Users"
 localuser = getpass.getuser()
 suffix = r"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\MySQLTests\CURRENT - Collections Data.xlsx"
 excel_relative_file_path = prefix + "\\" + localuser + suffix
-
-# Pandas Options
-# pd.options.display.max_columns = None
-# pd.options.display.width=None
-#####################################################################################################################################################
-# cherry()
-#####################################################################################################################################################
-
-# The DB connection string is --
-conn = con_to_db("isolatedsafety")
 
 
 # Student Data File Sheet1
@@ -57,7 +48,9 @@ column_mapping = {
 }
 print('SUCCESS: Connection to DB\nIN PROGRESS: Daily Collections Import')
 
-for collections_fileName_relative in glob.glob('Z:/*Collections*',recursive=True):
+tic = time.time()
+
+for collections_fileName_relative in glob.glob('Z:/*Collections*', recursive=True):
     data = pd.read_csv(collections_fileName_relative)
     data['FID'] = data['FID'].replace("staff", '')
     data['Most Recent Withdrawl'] = data['Most Recent Withdrawl'].replace("No LOE", '')
@@ -76,9 +69,18 @@ for collections_fileName_relative in glob.glob('Z:/*Collections*',recursive=True
         'Success: Deleting TEMPCollectionsData Table Content\nIN PROGRESS: Inserting Data from Excel Sheet into the Collections Dataframe.')
     logging.info(excel_df)
 
-    # Inserting Data from Excel Sheet into the Collections Dataframe
-    df_to_sql(conn, excel_df, "stage_collectionsdata")
-    conn.execute('CALL gcaassetmgmt_2_0.pers_uspupdatecollections')
+    connect = dbConnect("gcaassetmgmt_2_0")
+    connect.df_to_sql(excel_df, 'stage_collectionsdata')
+    connect.call('pers_uspupdatecollections')
+
+    # fileName_absolute = os.path.basename(collections_fileName_relative)
+    # new_name = "r" + str(Date) + 'r-' + fileName_absolute
+    # shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
+    # print(new_name + ' moved to Historical Folder.')
+    # logging.info(new_name + ' moved to Historical Folder.')
+
+    toc = time.time()
+    print('Done in {:.4f} seconds'.format(toc - tic))
 
     logging.info(
         'Success: Deleting TEMPCollectionsData Table Content\nIN PROGRESS: Inserting Data from Excel Sheet into the Collections Dataframe.')
