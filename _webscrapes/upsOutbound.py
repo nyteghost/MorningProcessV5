@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.options import Options
 import getpass
 import fnmatch
 import os
-from doorKey import config
+from mpConfigs.doorKey import config
 
 # from logger_setup import setup_logger, log_location
 # importlog = setup_logger('upsoutboundscrape', log_location + "\\" + "UPS Outbound" + "\\" + 'UPSOutboundScrape.log')

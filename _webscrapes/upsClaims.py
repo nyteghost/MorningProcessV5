@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import getpass
 import fnmatch
 import os
-from doorKey import config
+from mpConfigs.doorKey import config
 
 logFolder = os.path.join(os.path.normpath(os.getcwd() + os.sep + os.pardir), 'logs')
 

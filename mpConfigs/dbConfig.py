@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-import sqlalchemy as sa
 
 
 def con_to_db(database):

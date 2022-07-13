@@ -10,7 +10,7 @@ import io
 from loguru import logger
 import time
 from sqlalchemy import event
-from dbConfig import con_to_db, df_to_sql
+from mpConfigs.dbConfig import con_to_db, df_to_sql
 
 today = date.today()
 strtoday = str(today)

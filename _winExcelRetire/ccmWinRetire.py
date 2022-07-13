@@ -2,8 +2,8 @@ import pandas as pd
 import getpass
 import os
 import time
-from logger_setup import fridaylog
-from dbConfig import con_to_db
+from mpConfigs.logger_setup import fridaylog
+from mpConfigs.dbConfig import con_to_db
 
 prefix = r"C:\Users"
 localuser = getpass.getuser()
