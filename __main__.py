@@ -26,7 +26,6 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-
 t = datetime.datetime.now()
 log_date = t.strftime('%Y-%m-%d')
 
@@ -68,7 +67,7 @@ failedImports = []
 # logger.setLevel(logging.INFO)
 
 
-### Set days of week
+# Set days of week
 now = datetime.datetime.now()
 day = now.weekday()
 dt = datetime.datetime.now()
@@ -83,7 +82,11 @@ excelDriveFiles = []
 
 
 def preMorning():
-    ### Student Import
+    student_import = None
+    staff_import = None
+    collections_import = None
+
+    # Student Import
     try:
         student_import = 0
         if applejack() == "Exists":
@@ -108,7 +111,7 @@ def preMorning():
         failed_reason.append("nuStudent Test Sheet Import: " + str(ex))
         pass
 
-    ### Staff Import
+    # Staff Import
     try:
         staff_import = 0
         if banana() == "Exists":
@@ -132,7 +135,7 @@ def preMorning():
         failed_reason.append("Staff Import: " + str(e))
         pass
 
-    ### Collections Import
+    # Collections Import
     try:
         collections_import = 0
         if cherry() == "Exists":
@@ -180,7 +183,11 @@ def preMorning():
 
 
 def main_imports():
-    ### Scraping Data ###
+    ups_outbound_pass = 0
+    ups_claims_pass = 0
+    ups_capital_claims_pass = 0
+
+    # Scraping Data ###
     try:
         import _imports.nuChromeOS
     except Exception as e:
@@ -194,8 +201,7 @@ def main_imports():
         failed_list.append('')
 
     try:
-        ups_outbound_pass = 0
-        import _webscrapes.upsOutbound  ## Outbound
+        import _webscrapes.upsOutbound  # Outbound
     except Exception as e:
         logger.error(f'_data_scrapes.ups_outbound failed due to {e}')
         success_list.append('')
@@ -208,8 +214,7 @@ def main_imports():
         ups_outbound_pass = 1
 
     try:
-        ups_claims_pass = 0
-        import _webscrapes.upsClaims  ## Outbound
+        import _webscrapes.upsClaims  # Outbound
     except Exception as e:
         logger.error(f'_data_scrapes.ups_claims failed due to {e}')
         success_list.append('')
@@ -222,8 +227,7 @@ def main_imports():
         ups_claims_pass = 1
 
     try:
-        ups_capital_claims_pass = 0
-        import _webscrapes.upsCapitalClaims ## claim_submission_summary
+        import _webscrapes.upsCapitalClaims  # claim_submission_summary
     except Exception as e:
         logger.error(f'_data_scrapes.ups_capital_claims  failed due to {e}')
         success_list.append('')
@@ -235,7 +239,7 @@ def main_imports():
         failed_list.append('')
         ups_capital_claims_pass = 1
 
-    ### Imports ###
+    # Imports
     if ups_outbound_pass == 1:
         try:
             import _imports.upsOutbound
@@ -270,7 +274,7 @@ def main_imports():
         failed_list.append(f'UPS Claims Database Import')
         failed_reason.append(f'UPS claims pass={ups_claims_pass},ups_capital_claims_pass={ups_capital_claims_pass} ')
 
-    ### Sort the ASAP photos into folders by month, day, and FID
+    # Sort the ASAP photos into folders by month, day, and FID
     try:
         import _sorting.asapPhotoSort
     except Exception as e:
@@ -283,7 +287,7 @@ def main_imports():
         success_list.append(f'ASAP Photo Sort')
         failed_list.append('')
 
-    ### ASAP ticket completion removal
+    # ASAP ticket completion removal
     try:
         import _connectWise.asapRemoval
     except Exception as e:
@@ -296,7 +300,7 @@ def main_imports():
         success_list.append(f'ASAP Removal')
         failed_list.append('')
 
-    ### Address Validations
+    # Address Validations
     try:
         import _imports.addressValidation
     except Exception as e:
@@ -309,7 +313,7 @@ def main_imports():
         success_list.append(f'UPS/USPS Address Verification')
         failed_list.append('')
 
-    ### Returns/Address Verification
+    # Returns/Address Verification
     try:
         import _connectWise.retAddCheck
     except Exception as e:
@@ -322,7 +326,7 @@ def main_imports():
         success_list.append(f'Return/Address Change/Re-Opened')
         failed_list.append('')
 
-    ### Automate Reboot
+    # Automate Reboot
     try:
         from _connectWise.rebootAutomate import runIt
     except Exception as e:
@@ -335,8 +339,9 @@ def main_imports():
         success_list.append(f'CW Automate Reboot')
         failed_list.append('')
 
+
 def refresh_process(student_import, staff_import, collection_import):
-    ### RefreshALl
+    # RefreshALl
     try:
         refresh(filename='inventory')
     except Exception as e:
@@ -433,7 +438,7 @@ def refresh_process(student_import, staff_import, collection_import):
         success_list.append(f'CB Enroll Issues RefreshAll')
         failed_list.append('')
 
-    ### Verify All refreshed
+    # Verify All refreshed
     try:
         refreshModifiedcheck()
     except Exception as e:
@@ -488,7 +493,7 @@ def temp_imports():
 
 @logger.catch
 def main():
-    ###### MAIN RUN ######
+    # MAIN RUN
     cleanUp()
     if day != 6:
         if day != 0 and dt.time() < datetime.time(8, 30):
@@ -633,7 +638,7 @@ def toTeams():
     print('sendTable')
     mpReport.sendTable("MP Completion", 5, completion_df)
     if failed_reason:
-        mpReport.send("Failure Reason</br>"+"</br>".join(failed_reason))
+        mpReport.send("Failure Reason</br>" + "</br>".join(failed_reason))
 
 
 def asap_image_rename_email(status):
