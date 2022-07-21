@@ -1,9 +1,9 @@
 from fileinput import filename
 from unittest import skip
 # import logging
-from _ms_excel_refreshAll.xlwingrefreshall import refresh, refreshModifiedcheck
-from util_lib import apple, applejack, banana, cherry, cleanUp, check
-from logger_setup import studentStafflog, collectionslog
+from excelScripts.refreshAll import refresh, refreshModifiedcheck
+from mpConfigs.util_lib import apple, applejack, banana, cherry, cleanUp, check
+from mpConfigs.logger_setup import studentStafflog, collectionslog
 import datetime
 import time
 import pandas as pd
@@ -15,19 +15,17 @@ import os, sys
 import getpass
 import subprocess
 from loguru import logger
-import better_exceptions;
-from _misc.teamSend import TeamsChat
-
-
-
-
+import better_exceptions
+from _msGraph.teamSend import TeamsChat
+from mpConfigs.doorKey import config
 
 better_exceptions.hook()
 better_exceptions.MAX_LENGTH = None
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
-from doorKey import config
+
 
 t = datetime.datetime.now()
 log_date = t.strftime('%Y-%m-%d')
@@ -87,33 +85,13 @@ def preMorning():
     ### Student Import
     try:
         student_import = 0
-        if apple() == "Exists":
-            logger.info("Importing Student Sheet")
-            import _database_imports.student
-            logger.info('Student Import Complete')
-            success_list.append('Student Import')
-            failed_list.append('')
-            student_import = 1
-        else:
-            excelDriveFiles.append('No Student Sheet found.')
-            logger.info("No Student Sheet today.")
-            studentStafflog.info('A Updated Student Sheet was not found.')
-    except Exception as ex:
-        studentStafflog.info(ex)
-        studentStafflog.error('Issue with Student Sheet')
-        logger.info('Student Import Failed')
-        success_list.append('')
-        failed_list.append('Student Import')
-        failed_reason.append("Student Import: " + str(ex))
-        pass
-
-    try:
         if applejack() == "Exists":
             logger.info("Importing nuStudent Test Sheet")
-            import _database_imports.nuStudent
+            import _imports.nuStudent
             logger.info('nuStudent Import Complete')
             success_list.append('nuStudent Import')
             failed_list.append('')
+            student_import = 1
         else:
             excelDriveFiles.append('No nuStudent Sheet found.')
             logger.info("No nuStudent Test Sheet today.")
@@ -134,7 +112,7 @@ def preMorning():
         staff_import = 0
         if banana() == "Exists":
             logger.info("Importing Staff Sheet")
-            import _database_imports.staff
+            import _imports.nuStaff
             logger.info('Staff Import Complete')
             success_list.append('Staff Import')
             failed_list.append('')
@@ -157,7 +135,7 @@ def preMorning():
         collections_import = 0
         if cherry() == "Exists":
             logger.info("Importing Collections Sheet")
-            import _database_imports.collections
+            import _imports.nuCollections
             logger.info('Collections Import Complete')
             success_list.append('Collections Import')
             failed_list.append('')
@@ -181,7 +159,7 @@ def preMorning():
 def main_imports():
     ### Scraping Data ###
     try:
-        import _api_data.chromeos_device_info
+        import _imports.nuChromeOS
     except Exception as e:
         logger.error(f'chromeos_device_info failed due to {e}')
         success_list.append('')
@@ -194,7 +172,7 @@ def main_imports():
 
     try:
         ups_outbound_pass = 0
-        import _data_scrapes.ups_outbound  ## Outbound
+        import _webscrapes.upsOutbound  ## Outbound
     except Exception as e:
         logger.error(f'_data_scrapes.ups_outbound failed due to {e}')
         success_list.append('')
@@ -208,7 +186,7 @@ def main_imports():
 
     try:
         ups_claims_pass = 0
-        import _data_scrapes.ups_claims  ## Outbound
+        import _webscrapes.upsClaims  ## Outbound
     except Exception as e:
         logger.error(f'_data_scrapes.ups_claims failed due to {e}')
         success_list.append('')
@@ -222,7 +200,7 @@ def main_imports():
 
     try:
         ups_capital_claims_pass = 0
-        import _data_scrapes.ups_capital_claims  ## claim_submission_summary
+        import _webscrapes.upsCapitalClaims ## claim_submission_summary
     except Exception as e:
         logger.error(f'_data_scrapes.ups_capital_claims  failed due to {e}')
         success_list.append('')
@@ -237,7 +215,7 @@ def main_imports():
     ### Imports ###
     if ups_outbound_pass == 1:
         try:
-            import _database_imports.ups_outbound
+            import _imports.upsOutbound
         except Exception as e:
             logger.error(f'_database_imports.ups_outbound  failed due to {e}')
             success_list.append('')
@@ -254,7 +232,7 @@ def main_imports():
 
     if ups_claims_pass == 1 and ups_capital_claims_pass == 1:
         try:
-            import _database_imports.ups_claims
+            import _imports.upsClaims
         except Exception as e:
             logger.error(f'_database_imports.ups_claims failed due to {e}')
             success_list.append('')
@@ -271,7 +249,7 @@ def main_imports():
 
     ### Sort the ASAP photos into folders by month, day, and FID
     try:
-        import _database_imports.asap_photo_sort
+        import _sorting.asapPhotoSort
     except Exception as e:
         logger.error(f'_database_imports.asap_photo_sort failed due to {e}')
         success_list.append('')
@@ -284,7 +262,7 @@ def main_imports():
 
     ### ASAP ticket completion removal
     try:
-        import _misc.asap_removal
+        import _connectWise.asapRemoval
     except Exception as e:
         logger.error(f'_misc.asap_removal failed due to {e}')
         success_list.append('')
@@ -297,7 +275,7 @@ def main_imports():
 
     ### Address Validations
     try:
-        import _api_data.ups_address_validation
+        import _imports.addressValidation
     except Exception as e:
         logger.error(f'_api_data.ups_address_validation failed due to {e}')
         success_list.append('')
@@ -310,7 +288,7 @@ def main_imports():
 
     ### Returns/Address Verification
     try:
-        import _misc.return_addresschange_reopened
+        import _connectWise.retAddCheck
     except Exception as e:
         logger.error(f'_misc.return_addresschange_reopened failed due to {e}')
         success_list.append('')
@@ -323,7 +301,7 @@ def main_imports():
 
     ### Automate Reboot
     try:
-        from _misc.rebootAutomate import runIt
+        from _connectWise.rebootAutomate import runIt
     except Exception as e:
         logger.error(f'_misc.rebootAutomate failed due to {e}')
         success_list.append('')
@@ -492,7 +470,7 @@ def main():
     if day != 6:
         if day != 0 and dt.time() < datetime.time(8, 30):
             try:
-                import _api_data.ms_account_force_pass_reset
+                import _msGraph.forcePassReset
             except Exception as e:
                 logger.error(f'ms_account_force_pass_reset failed due to {e}')
                 success_list.append('')
@@ -505,7 +483,7 @@ def main():
 
         elif day == 0 and dt.time() < datetime.time(8, 30):
             try:
-                import _api_data.ms_account_block_user
+                import _msGraph.accountBlockUser
             except Exception as e:
                 logger.error(f'ms_account_block_user failed due to {e}')
                 success_list.append('')
@@ -524,7 +502,7 @@ def main():
         elif datetime.time(11, 0) < dt.time() < datetime.time(15, 0):
             main_imports()
             try:
-                import _database_imports.tmobile_subscriber_report
+                import _imports.nuTmobReport
             except Exception as e:
                 logger.error(f'There was a problem with T-Mobile Subscriber Report Import.\n{e}')
                 success_list.append('')
@@ -541,7 +519,7 @@ def main():
         if day == 4:
             if time_in_range(day_start, middle, current):
                 try:
-                    import automateWinRetire.ccmWinRetire
+                    import excelScripts.ccmWinRetire
                 except Exception as e:
                     logger.error(f'ccmWinRetire failed due to {e}')
                     success_list.append('')
@@ -553,7 +531,7 @@ def main():
                     failed_list.append('')
 
                 try:
-                    import automateWinRetire.gcaWinRetire
+                    import excelScripts.gcaWinRetire
                 except Exception as e:
                     logger.error(f'gcaWinRetire failed due to {e}')
                     success_list.append('')
@@ -566,7 +544,7 @@ def main():
 
             if time_in_range(middle, end, current):
                 try:
-                    import _misc.fBar
+                    import _connectWise.fBar
                 except Exception as e:
                     logger.error(f'fBar failed due to {e}')
                     success_list.append('')
@@ -691,7 +669,7 @@ if dt.time() > datetime.time(17, 30):
     if isdir:
         try:
             subprocess.call(r"_misc\barcode_img_rename.py", shell=True)
-            import _database_imports.tn2jpg
+            import _sorting.tracking2jpg
         except Exception as e:
             asap_image_rename_email(f'failed due to {e}')
         else:
