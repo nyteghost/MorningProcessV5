@@ -1,11 +1,21 @@
+from csv import excel
+from distutils.log import error
 import getpass
 import time
+import win32com.client
+import os, sys
 import logging
-import os
+import os, sys
+import pythoncom
+import gc
 import xlwings as xw
 import threading
-
 from mpConfigs.util_lib import check
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 
 logging.basicConfig(
     filename=r'C:\Users\SCA\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\logs\refresh.log',
@@ -178,7 +188,8 @@ def refreshAll():
 
 
 if __name__ == "__main__":
-    #    refresh('asap')
+    # refresh('staff')
+    # refresh('collections')
     refreshAll()
-    t = threading.Thread(target=refreshAll)
-    t.start()
+    # t = threading.Thread(target=refresh('collections'))
+    # t.start()

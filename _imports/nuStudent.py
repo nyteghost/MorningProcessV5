@@ -213,12 +213,21 @@ for student_fileName_relative in glob.glob(f'Z:/*SCA_21-22_Final{noHyphenDate}*'
 
         print('starting update to SQL')
 
+        hasList = []
+        hasNotList = []
+        for k, v in column_mapping.items():
+            if "END" in v and v != "GENDER":
+                hasList.append(v)
+            else:
+                hasNotList.append(v)
+        df2[hasList] = df2[hasList].astype('str')
+
         gcaAssetMGMT = dbConnect("gcaassetmgmt_2_0")
         gcaAssetMGMT.df_to_sql(df2, 'stage_studentdata_test')
-        gcaAssetMGMT.call('CALL pers_uspupdatestudentdata')
-        gcaAssetMGMT.call('CALL asset_uspreassigndevs2youngestest(')
-        gcaAssetMGMT.call('CALL asset_uspcbreassign2esfromwd')
-        gcaAssetMGMT.call('CALL asset_uspes_sib_kitdist')
+        gcaAssetMGMT.call('pers_uspupdatestudentdata')
+        gcaAssetMGMT.call('asset_uspreassigndevs2youngestest(')
+        gcaAssetMGMT.call('asset_uspcbreassign2esfromwd')
+        gcaAssetMGMT.call('asset_uspes_sib_kitdist')
 
         toc = time.time()
         print('Done in {:.4f} seconds'.format(toc - tic))
