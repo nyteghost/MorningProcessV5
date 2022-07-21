@@ -61,6 +61,7 @@ completion_list = []
 success_list = []
 failed_list = []
 failed_reason = []
+failedImports = []
 # skipped_list=[]
 
 # logger = logging.getLogger()
@@ -96,7 +97,7 @@ def preMorning():
             excelDriveFiles.append('No nuStudent Sheet found.')
             logger.info("No nuStudent Test Sheet today.")
             studentStafflog.info('A Updated nuStudent Test Sheet was not found.')
-
+            failedImports.append("Student")
     except Exception as ex:
         studentStafflog.info(str(ex))
         print(ex)
@@ -121,6 +122,7 @@ def preMorning():
             excelDriveFiles.append('No Staff Sheet found.')
             logger.info("No Staff Sheet today.")
             studentStafflog.info('A Updated Staff Sheet was not found.')
+            failedImports.append("Staff")
     except Exception as ex:
         studentStafflog.error(ex)
         studentStafflog.error('Issue with Staff Sheet')
@@ -144,6 +146,7 @@ def preMorning():
             excelDriveFiles.append('No Collections Sheet found.')
             logger.info("No Collections Sheet today.")
             collectionslog.info('A Updated Collections Sheet was not found.')
+            failedImports.append("Collections")
     except Exception as ex:
         collectionslog.error(ex)
         collectionslog.error('Issue with Collections Sheet')
@@ -152,6 +155,26 @@ def preMorning():
         failed_list.append('Collections Import')
         failed_reason.append("Collections Import: " + str(e))
         pass
+
+    if failedImports:
+        reportError = TeamsChat('mpReport')
+        for drive in "Z":
+            drive += ':'
+
+            try:
+                os.scandir(drive)
+                status = "accessible"
+            except Exception:
+                status = "non accessible"
+
+            print(drive, os.access(drive, os.R_OK), status)
+            if status == 'non accessible':
+                # reportError.send('This is a test of the reporting system.')
+                reportError.send(f'Python was unable to discover the {drive} drive. ', 'Josh')
+            else:
+                # reportError.send('This is a test of the reporting system.')
+                reportError.send(f'Missing {failedImports} from {drive} Drive.', 'Josh')
+            reportError.send(f'Please hold off until the imports are complete!', 'Elijah')
 
     return student_import, staff_import, collections_import
 
