@@ -9,6 +9,7 @@ from datetime import date
 from mpConfigs.doorKey import config
 from mpConfigs.logger_setup import setup_logger, log_location
 from mpConfigs.dbConfig import dbConnect
+from _msGraph.auth import getAuth
 
 today = date.today()
 strtoday = str(today)
@@ -23,8 +24,8 @@ conn = gcaAssetMGMT.connection()
 class my_dictionary(dict):
     # __init__ function
     def __init__(self):
+        super().__init__()
         self = dict()
-        # Function to add key:value
 
     def add(self, key, value):
         self[key] = value
@@ -32,6 +33,8 @@ class my_dictionary(dict):
 
 query = f"CALL rep_uspNewStaffTerms"
 staffTopsBlock = pd.read_sql(query, conn)
+cwURL = 'https://api-na.myconnectwise.net/v2021_2/apis/3.0/'
+ENDPOINT = 'https://graph.microsoft.com/v1.0'
 
 # ### Create list of staff members that are being disabled
 # list_a=[]
@@ -40,48 +43,48 @@ staffTopsBlock = pd.read_sql(query, conn)
 # list_a_joined= "\n".join(list_a)
 
 
-### Create dictionary of staff members and term date that are being disabled
+#Create dictionary of staff members and term date that are being disabled
 dict_a = my_dictionary()
 for u, d in zip(staffTopsBlock.UserPrincipalName, staffTopsBlock.EndDate):
     d = str(d)
     dict_a.add(u, d)
 
 # Variables
-TENANT_ID = config['tenant_id']
-CLIENT_ID = config['client_id']
-cwURL = 'https://api-na.myconnectwise.net/v2021_2/apis/3.0/'
-AUTHORITY = 'https://login.microsoftonline.com/' + TENANT_ID
-ENDPOINT = 'https://graph.microsoft.com/v1.0'
+# TENANT_ID = config['tenant_id']
+# CLIENT_ID = config['client_id']
+# AUTHORITY = 'https://login.microsoftonline.com/' + TENANT_ID
+#
+# SCOPES = [
+#     'Files.ReadWrite.All',
+#     'Sites.ReadWrite.All',
+#     'User.Read',
+#     'User.ReadBasic.All'
+# ]
+#
+# cache = msal.SerializableTokenCache()
+#
+# if os.path.exists('token_cache.bin'):
+#     cache.deserialize(open('token_cache.bin', 'r').read())
+#
+# atexit.register(lambda: open('token_cache.bin', 'w').write(cache.serialize()) if cache.has_state_changed else None)
+#
+# app = msal.PublicClientApplication(CLIENT_ID, authority=AUTHORITY, token_cache=cache)
+#
+# accounts = app.get_accounts()
+# result = None
+# if len(accounts) > 0:
+#     result = app.acquire_token_silent(SCOPES, account=accounts[0])
+#
+# if result is None:
+#     flow = app.initiate_device_flow(scopes=SCOPES)
+#     if 'user_code' not in flow:
+#         raise Exception('Failed to create device flow')
+#
+#     print(flow['message'])
+#
+#     result = app.acquire_token_by_device_flow(flow)
 
-SCOPES = [
-    'Files.ReadWrite.All',
-    'Sites.ReadWrite.All',
-    'User.Read',
-    'User.ReadBasic.All'
-]
-
-cache = msal.SerializableTokenCache()
-
-if os.path.exists('token_cache.bin'):
-    cache.deserialize(open('token_cache.bin', 'r').read())
-
-atexit.register(lambda: open('token_cache.bin', 'w').write(cache.serialize()) if cache.has_state_changed else None)
-
-app = msal.PublicClientApplication(CLIENT_ID, authority=AUTHORITY, token_cache=cache)
-
-accounts = app.get_accounts()
-result = None
-if len(accounts) > 0:
-    result = app.acquire_token_silent(SCOPES, account=accounts[0])
-
-if result is None:
-    flow = app.initiate_device_flow(scopes=SCOPES)
-    if 'user_code' not in flow:
-        raise Exception('Failed to create device flow')
-
-    print(flow['message'])
-
-    result = app.acquire_token_by_device_flow(flow)
+result = getAuth('graph')
 
 budata = """{"accountEnabled": 'False'}}"""
 buheaders = {'Accept': 'application/json', 'Authorization': 'Bearer ' + result['access_token'],
@@ -155,6 +158,3 @@ ticket_notes.create_ticket_note(note)
 #     print(result.text)
 # else:
 #     raise Exception('no access token in result')
-
-
-

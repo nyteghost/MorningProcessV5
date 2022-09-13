@@ -250,7 +250,7 @@ def main():
     else:
         print("Empty reval-USPS rows.")
 
-    gcaAssetMGMT.call(f"CALL ship_cleanvalidatedaddresses")
+    gcaAssetMGMT.call(f"ship_cleanvalidatedaddresses")
 
     completeTime = (time.time() - startTime)
     print(completeTime)

@@ -16,7 +16,7 @@ strtoday = str(today)
 Date = today
 
 logger.disable("my_library")
-logging.basicConfig(filename=f"..\\..\\logs\\staff {Date}.log", level=logging.ERROR)
+logger.add(f"..\\..\\logs\\nuStaff {Date}.log", rotation="500 MB")
 
 prefix = r"C:\Users"
 localuser = getpass.getuser()
@@ -74,29 +74,77 @@ column_mapping = {
 print('SUCCESS: Connection to DB\nIN PROGRESS: Daily Staff Import')
 tic = time.time()
 
-process_query = f"EXEC GCAAssetMGMT_2_0.[Pers].[uspUpdateStaffData];"
+dtype = {
+    'collections end': 'datetime64[ns]',
+     'collections start': 'datetime64[ns]',
+     'current title': 'object',
+     'declined printer': 'int64',
+     'desktop end': 'datetime64[ns]',
+     'desktop start': 'datetime64[ns]',
+     'duplicate printer authorization': 'object',
+     'external monitor authorization': 'object',
+     'ga cyber email': 'object',
+     'hotspot authorization': 'object',
+     'latitude 5500': 'object',
+     'monitor requested': 'object',
+     'office staff': 'int64',
+     'online email': 'object',
+     'shipment hold': 'datetime64[ns]',
+     'staff type': 'object',
+     'stf city': 'object',
+     'stf ext': 'object',
+     'stf first': 'object',
+     'stf hire': 'datetime64[ns]',
+     'stf id': 'object',
+     'stf last': 'object',
+     'stf pers email': 'object',
+     'stf pers phone': 'object',
+     'stf pid': 'int64',
+     'stf st': 'object',
+     'stf street': 'object',
+     'stf term': 'object',
+     'stf work phone': 'object',
+     'stf zip': 'object',
+     'student chromebook end': 'datetime64[ns]',
+     'student chromebook start': 'datetime64[ns]',
+     'student ctae laptop end': 'datetime64[ns]',
+     'student ctae laptop start': 'datetime64[ns]',
+     'student windows laptop end': 'datetime64[ns]',
+     'student windows laptop start': 'datetime64[ns]',
+     'y510': 'object',
+     'zoomy': 'object'
+    }
 
-try:
-    for staff_fileName_relative in glob.glob('Z:/*Staff*', recursive=True):
-        if staff_fileName_relative:
-            print('Attempting Data import')
-            data = pd.read_csv(staff_fileName_relative)
-            data = data.replace("Null", '')
-            df = pd.DataFrame(data, columns=list(column_mapping.keys())).astype(str).where(pd.notnull(data), None).replace('\.0', '', regex=True)
-            print(df)
 
-            connect = dbConnect("gcaassetmgmt_2_0")
-            connect.df_to_sql(df, 'stage_staffdata')
-            connect.call('pers.uspupdatestaffdata')
-            df.to_excel(staff_excel_output)
 
-            # fileName_absolute = os.path.basename(staff_fileName_relative)
-            # new_name = "r" + str(Date) + 'r-' + fileName_absolute
-            # shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
-            # print(new_name + ' moved to Historical Folder.')
-            # logging.info(new_name + ' moved to Historical Folder.')
-except Exception as e:
-    raise Exception("Unable to run staff sheet import" + str(e))
+
+for staff_fileName_relative in glob.glob('Z:/*Staff*', recursive=True):
+    if staff_fileName_relative:
+        print('Attempting Data import')
+        data = pd.read_csv(staff_fileName_relative)
+        data = data.replace("Null", '')
+        df = pd.DataFrame(data, columns=list(column_mapping.keys())).astype(str).where(pd.notnull(data), None).replace('\.0', '', regex=True)
+        print(df)
+
+
+
+        # df['dob'] = pd.to_datetime(df['dob'], format='%#d/%#m/%Y', infer_datetime_format=True)
+
+        df.columns = df.columns.str.lower()
+        for k, v in dtype.items():
+            df[k] = df[k].astype(v, errors='ignore')
+
+        connect = dbConnect("gcaassetmgmt_2_0")
+        connect.df_to_sql(df, 'stage_staffdata')
+        connect.call('pers_uspupdatestaffdata')
+        # df.to_excel(staff_excel_output)
+
+        # fileName_absolute = os.path.basename(staff_fileName_relative)
+        # new_name = "r" + str(Date) + 'r-' + fileName_absolute
+        # shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
+        # print(new_name + ' moved to Historical Folder.')
+        # logging.info(new_name + ' moved to Historical Folder.')
+
 
 toc = time.time()
 print('Done in {:.4f} seconds'.format(toc - tic))

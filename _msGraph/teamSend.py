@@ -59,7 +59,7 @@ class TeamsChat:
             self.chat_ID = os.getenv('ccmChat')
         elif chat_ID == "mpReport":
             self.chat_ID = os.getenv('mpReport')
-        self.funcResult = getAuth()
+        self.funcResult = getAuth('teams')
         self.headers = {
                     'Accept': 'application/json',
                    'Authorization': 'Bearer '+self.funcResult['access_token'],
@@ -148,7 +148,7 @@ class TeamsChat:
         print(res.text)
 
     def receive(self, top):
-        funcResult = getAuth()
+        funcResult = getAuth('teams')
         url = ENDPOINT + f'/chats/{self.chat_ID}/messages?$top={top}'
         result = requests.get(url, headers=self.headers).json()
         # result = json.loads(result.text)

@@ -20,7 +20,7 @@ dl_path = r"\Downloads"
 
 # Chrome Settings
 options = Options()
-options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
+# options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
 options.add_argument("start-maximized")
 # Chrome Settings
 options.add_experimental_option("prefs", {
@@ -61,25 +61,32 @@ driver.find_element(By.ID, 'submitBtn').click()  # Presses Log In Button
 print("Claims Dashboard loading. Waiting for Selection.")
 
 wait = WebDriverWait(driver, 30)
-time.sleep(20)
+
+# Change Layout
+wait.until(EC.element_to_be_clickable((By.ID, 'layoutDropdown'))).click()
+wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="ups-main"]/div/div/ups-cou-app/div/ng-component/div[2]/div/div[5]/div[1]/div[1]/span[3]/div/div[1]/button'))).click()
+slt = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'SLT')))
+driver.execute_script("arguments[0].click();", slt)
 
 # Click Export Data
 wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'Export Table'))).click()
 
 # Once box opens with choices for download, selects xlsx format
+xls = driver.find_element(By.ID, 'ups-xls')
 xlsx = driver.find_element(By.ID, 'ups-xlsx')
-driver.execute_script("arguments[0].click();", xlsx)
-
+driver.execute_script("arguments[0].click();", xls)
+time.sleep(20)
 # Click download button
 driver.find_element(By.CSS_SELECTOR, "div.ups-form_ctaGroup:nth-child(3) > button:nth-child(1)").click()
 
 counter = 0
+time.sleep(5)
 while counter < 3:
     print('counter =' + str(counter))
-    time.sleep(30)
+    time.sleep(10)
 
     for file in os.listdir(excel_relative_file_path):
-        if fnmatch.fnmatch(file, 'Report*.xlsx'):
+        if fnmatch.fnmatch(file, 'Report*.xls'):
             print('Found Report.xlsx')
             counter += 3
         else:

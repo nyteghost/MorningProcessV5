@@ -32,13 +32,13 @@ excel_relative_file_path = out_path + '\\' + 'UPSShipmentsDaily.xlsx'
 pd.options.display.max_columns = None
 pd.options.display.width = None
 
-## Rename Outbound File
-for file in os.listdir(prefix + "\\" + localuser + "\\" + suffix):
-    if fnmatch.fnmatch(file, 'outbound_*.csv'):
-        print(file)
-        read_file = pd.read_csv(prefix + "\\" + localuser + suffix + "\\" + file)
-        read_file.to_excel(out_path + "\\" + named_shipment, index=None, header=True)
-        shutil.move((prefix + "\\" + localuser + suffix + "\\" + file), processed_file)
+# ## Rename Outbound File
+# for file in os.listdir(prefix + "\\" + localuser + "\\" + suffix):
+#     if fnmatch.fnmatch(file, 'outbound_*.csv'):
+#         print(file)
+#         read_file = pd.read_csv(prefix + "\\" + localuser + suffix + "\\" + file)
+#         read_file.to_excel(out_path + "\\" + named_shipment, index=None, header=True)
+#         shutil.move((prefix + "\\" + localuser + suffix + "\\" + file), processed_file)
 
 
 
@@ -71,6 +71,53 @@ column_mapping = {
 data = pd.read_excel(excel_relative_file_path)
 excel_df = pd.DataFrame(data, columns=list(column_mapping.keys())).astype(str).where(pd.notnull(data), None).replace('\.00', '', regex=True).replace('Not Avail.', '', regex=True)
 importlog.info('Daily Shipment Import.')
+
+excel_df.rename(columns={
+    'Tracking Number': 'tracking number',
+    'Status': 'status',
+    'Package Reference No. 1': 'package reference no# 1',
+    'Package Reference No. 2': 'package reference no# 2',
+    'Manifest Date': 'manifest date',
+    'Ship To Name': 'ship to name',
+    'Ship To City': 'ship to city',
+    'Ship To State/Province': 'ship to state/province',
+    'Ship To Postal Code': 'ship to postal code',
+    'Ship To Country or Territory': 'ship to country or territory',
+    'Service': 'service',
+    'Scheduled Delivery': 'scheduled delivery',
+    'Exception Description': 'exception description',
+    'Exception Status Description': 'exception status description',
+    'Exception Resolution': 'exception resolution',
+    'Return To Sender Indicator': 'return to sender indicator',
+    'Date Delivered': 'date delivered',
+    'Alternate Tracking Number': 'alternate tracking number',
+    'Shipment Activity Date': 'shipment activity date'
+}, inplace=True)
+
+dtype = {
+     'alternate tracking number': 'object',
+     'date delivered': 'datetime64[ns]',
+     'exception description': 'object',
+     'exception resolution': 'object',
+     'exception status description': 'object',
+     'manifest date': 'datetime64[ns]',
+     'package reference no# 1': 'object',
+     'package reference no# 2': 'object',
+     'return to sender indicator': 'object',
+     'scheduled delivery': 'object',
+     'service': 'object',
+     'ship to city': 'object',
+     'ship to country or territory': 'object',
+     'ship to name': 'object',
+     'ship to postal code': 'float64',
+     'ship to state/province': 'object',
+     'shipment activity date': 'datetime64[ns]',
+     'status': 'object',
+     'tracking number': 'object'}
+
+for k, v in dtype.items():
+    excel_df[k] = excel_df[k].astype(v, errors='ignore')
+
 
 connect = dbConnect("shippingliaison")
 connect.df_to_sql(excel_df, 'dbo_upsrawdata')

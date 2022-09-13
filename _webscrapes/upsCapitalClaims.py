@@ -23,7 +23,7 @@ print("Setting Profile for connection, please be patient")
 
 # Chrome Settings
 options = Options()
-options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
+# options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
 options.add_argument("start-maximized")
 # Chrome Settings
 options.add_experimental_option("prefs", {
@@ -62,8 +62,7 @@ counter = 0
 
 # Wait for and Locate Export Button
 wait = WebDriverWait(driver, 60)  # Wait time setup for 1200 Seconds or 20 minutes. Should Never take this long.
-export_button = wait.until(EC.element_to_be_clickable((By.XPATH,
-                                                       '/html/body/upsc-root/upsc-layout/div[3]/div/div/div/upsc-claims/div/upsc-claim-list/div/div[1]/div[2]/div[1]')))
+export_button = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/upsc-root/upsc-layout/div[3]/div/div/div/upsc-claims/div/upsc-claim-list/div/div[1]/div[2]/div[1]')))
 export_button.click()
 driver.implicitly_wait(5)
 driver.find_element(By.XPATH, '//*[@id="mat-dialog-0"]/upsc-export/mat-dialog-actions/div/a[2]').click()

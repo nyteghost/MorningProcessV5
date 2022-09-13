@@ -20,7 +20,7 @@ import smtplib, ssl
 import json
 import urllib
 import os, sys
-
+from mpConfigs.dbConfig import dbConnect
 from mpConfigs.doorKey import config
 
 """
@@ -36,13 +36,7 @@ cwAURL = 'https://sca-atl.hostedrmm.com/cwa/api/v1/'
 cwTEURL = config['cwAPI']['web'] + '/time/entries'
 
 # Connection to SQL Database
-params = urllib.parse.quote_plus("DRIVER={SQL Server Native Client 11.0};"
-                                 'Server=' + (config['database']['Server']) + ';'
-                                                                              'Database=IsolatedSafety;'
-                                                                              'UID=' + (config['database']['UID']) + ';'
-                                                                                                                     'PWD=' + (
-                                 config['database']['PWD']) + ';')
-conn = create_engine(f"mssql+pyodbc:///?odbc_connect={params}&autocommit=true")
+isolatedsafety = dbConnect("isolatedsafety")
 
 prefix = r"C:\Users"
 localuser = getpass.getuser()
@@ -194,7 +188,12 @@ def json_to_sql(json_object):
                         WHEN pc.Student = 1 THEN CONCAT('FID_',pc.FamilyID)
                         WHEN pc.Staff = 1   THEN CONCAT('STF_',TRIM(pc.Org_ID)) END)
         """
-    seventeen = pd.read_sql_query(statement, conn)
+    # seventeen = pd.read_sql_query(statement, conn)
+
+    seventeen = isolatedsafety.call(statement)
+
+
+
     df = pd.DataFrame(seventeen)
     return df
 
@@ -317,11 +316,16 @@ def addressChange():
                 if x == "":
                     continue
                 else:
-                    NewAddress_query = f"EXEC GCAAssetMGMT_2_0.dbo.[uspUpdatedRecord] " + x
-                    NewAddress = pd.read_sql(NewAddress_query, conn)
+                    NewAddress = isolatedsafety.query(f"gcaassetmgmt_2_0.admininfo_uspupdatedrecord('{x}')")
 
-                    database_address_query = f"EXEC IsolatedSafety.dbo.[uspFamilyLookUp]  " + x
-                    database_address = pd.read_sql(database_address_query, conn)
+                    # NewAddress_query = f"EXEC GCAAssetMGMT_2_0.dbo.[uspUpdatedRecord] " + x
+                    # NewAddress = pd.read_sql(NewAddress_query, conn)
+                    # print(NewAddress)
+
+                    # database_address_query = f"EXEC IsolatedSafety.dbo.[uspFamilyLookUp]  " + x
+                    # database_address = pd.read_sql(database_address_query, conn)
+
+                    database_address = isolatedsafety.query(f'dbo_uspfamilylookup({x})')
                     database_street = database_address.loc[database_address['StudentID'] == x]
                     ferpaName = database_address['FERPA_Contact'].loc[0]
 
@@ -380,9 +384,8 @@ def addressChange():
 
 time_now = localtime = time.asctime(time.localtime(time.time()))
 sender_email = "mbrownscaadmin@georgiacyber.org"
-coworkers = ["mbrown@sca-atl.com", "nbowman@sca-atl.com", "Aadeli@sca-atl.com", "emorris@sca-atl.com",
-             "bdixon@sca-atl.com", "bkrusac@sca-atl.com"]
-# coworkers= ["mbrown@sca-atl.com"]
+# coworkers = ["mbrown@sca-atl.com", "nbowman@sca-atl.com", "Aadeli@sca-atl.com", "emorris@sca-atl.com", "bkrusac@sca-atl.com"]
+coworkers= ["mbrown@sca-atl.com"]
 password = (config['google']['mailapp'])
 message = MIMEMultipart("alternative")
 message["Subject"] = "Student Asset Returns and Address Changes " + str(time_now)

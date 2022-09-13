@@ -220,8 +220,8 @@ def updateOrgData():
 def updateMain():
     updateAsset = pd.read_sql(updateAssetquery, conn)
     for i in range(len(updateAsset)):
-        deviceId = updateAsset.loc[i, 'deviceID']
-        newAsset = updateAsset.loc[i, 'NewAssetID']
+        deviceId = updateAsset.loc[i, 'deviceid']
+        newAsset = updateAsset.loc[i, 'newassetid']
         print('\nNew Asset ID :', newAsset)
         service = getCredentials()
         updateRequestPoint(service, deviceId, {"annotatedAssetId": "{}".format(newAsset)})
