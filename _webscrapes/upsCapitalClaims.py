@@ -65,7 +65,7 @@ wait = WebDriverWait(driver, 60)  # Wait time setup for 1200 Seconds or 20 minut
 export_button = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/upsc-root/upsc-layout/div[3]/div/div/div/upsc-claims/div/upsc-claim-list/div/div[1]/div[2]/div[1]')))
 export_button.click()
 driver.implicitly_wait(5)
-driver.find_element(By.XPATH, '//*[@id="mat-dialog-0"]/upsc-export/mat-dialog-actions/div/a[2]').click()
+driver.find_element(By.XPATH, '//*[@id="mat-dialog-0"]/upsc-export/div/mat-dialog-actions/div/a[2]').click()
 print('Downloading Claims File')
 time.sleep(5)
 while counter < 3:

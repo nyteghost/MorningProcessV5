@@ -66,7 +66,7 @@ def allSort():
 
 allScrape()
 
-allImport()
+
 
 
 # driver = webdriver.Chrome()

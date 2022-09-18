@@ -11,6 +11,7 @@ import gc
 import xlwings as xw
 import threading
 from mpConfigs.util_lib import check
+from wrapt_timeout_decorator import *
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
@@ -44,9 +45,8 @@ class XwApp(xw.App):
                 pass
         self.kill()
 
-
+@timeout(600)
 def refresh(filename=''):
-    check()
     prefix = r"C:\Users" + '\\'
     localuser = getpass.getuser()
     suffix = r"\Southeastern Computer Associates, LLC"
@@ -157,31 +157,37 @@ def refreshModifiedcheck():
 
 def refreshAll():
     try:
+        check()
         refresh(filename='inventory')
     except Exception as e:
         refreshlog.info(f'There was a problem with refreshing the inventory;\n{e}')
 
     try:
+        check()
         refresh(filename='student')
     except Exception as e:
         refreshlog.info(f'There was a problem with refreshAll the Student File;\n{e}')
 
     try:
+        check()
         refresh(filename='staff')
     except Exception as e:
         refreshlog.info(f'here was a problem with refreshAll the Staff File;\n{e}')
 
     try:
+        check()
         refresh(filename='collections')
     except Exception as e:
         refreshlog.info(f'There was a problem with refreshAll the Collections File;\n{e}')
 
     try:
+        check()
         refresh(filename='asap')
     except Exception as e:
         refreshlog.info(f'There was a problem with refreshAll the ASAP Post File;\n{e}')
 
     try:
+        check()
         refresh(filename='ccm')
     except Exception as e:
         refreshlog.info(f'There was a problem with refreshAll the CCM Inventory File;\n{e}')
