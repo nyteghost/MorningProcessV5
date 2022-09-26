@@ -1,6 +1,18 @@
 from concurrent.futures import ThreadPoolExecutor
 
 
+def studentImport():
+    import _imports.nuStudent
+
+
+def staffImport():
+    import _imports.nuStaff
+
+
+def collectionsImport():
+    import _imports.nuCollections
+
+
 def apiChromeOS():
     import _imports.nuChromeOS
 
@@ -39,6 +51,13 @@ def sortAddressVerify():
 
 def sortTracking2JPG():
     import _sorting.tracking2jpg
+
+
+def allGCAPeople():
+    with ThreadPoolExecutor() as executor:
+        executor.submit(studentImport)
+        executor.submit(staffImport)
+        executor.submit(collectionsImport)
 
 
 def allScrape():

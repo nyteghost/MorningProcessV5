@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import time
-from alive_progress import alive_bar, alive_it
+# from alive_progress import alive_bar, alive_it
 from requests.adapters import HTTPAdapter, Retry
 from usps import USPSApi, Address
 import sys

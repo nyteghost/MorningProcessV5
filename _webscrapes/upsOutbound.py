@@ -26,6 +26,7 @@ dl_path = r"\Downloads"
 
 # Chrome Settings
 options = Options()
+options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
 options.add_argument("start-maximized")

@@ -84,8 +84,10 @@ class dbConnect:
                 print(type(e))
                 print(e)
                 print(f'Call {procedure} failed')
+                return False
             else:
                 print(f'Call {procedure} successful')
+                return True
 
     def get_dtypes(self, df, query):
         result = pd.read_sql(query, self.engine)

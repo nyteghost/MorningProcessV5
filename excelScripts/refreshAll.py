@@ -1,15 +1,8 @@
-from csv import excel
-from distutils.log import error
 import getpass
 import time
-import win32com.client
 import os, sys
-import logging
-import os, sys
-import pythoncom
-import gc
 import xlwings as xw
-import threading
+from loguru import logger
 from mpConfigs.util_lib import check
 from wrapt_timeout_decorator import *
 
@@ -18,19 +11,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 
-logging.basicConfig(
-    filename=r'C:\Users\SCA\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Daily Data Sets\logs\refresh.log',
-    format='%(asctime)s %(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p',
-    encoding='utf-8',
-    filemode='a',
-    level=logging.DEBUG)
-
-# Creating an object
-refreshlog = logging.getLogger('refresh')
-
-# Setting the threshold of logger to DEBUG
-refreshlog.setLevel(logging.DEBUG)
+logger.add("../logs/refresh_output.log", diagnose=False)
 
 
 class XwApp(xw.App):
@@ -44,6 +25,7 @@ class XwApp(xw.App):
             except:
                 pass
         self.kill()
+
 
 @timeout(600)
 def refresh(filename=''):
@@ -80,22 +62,33 @@ def refresh(filename=''):
     savelocation = r'C:\\Users\\SCA\\Desktop\\Excel' + '{savefilename}'
 
     try:
-        wb = xw.Book(fileName)
-        time.sleep(10)
-        wb.api.Connections(1).OLEDBConnection.BackgroundQuery = False
-        print(f"Refreshing {savefilename}")
-        wb.api.RefreshAll()
-        print(f"Finished refreshing {savefilename}")
-        wb.api.Connections(1).OLEDBConnection.BackgroundQuery = True
-        wb.save()
-        time.sleep(10)
-        xl = xw.apps.active.api
-        xl.Quit()
+        with xw.App(visible=True) as app:
+            # app.display_alerts = False
+            app.screen_updating = False
+            book = xw.Book(fileName)
+            book.api.Connections(1).OLEDBConnection.BackgroundQuery = False
+            sheet_names = book.sheets
+
+            for n, sheet in enumerate(sheet_names):
+                print(f'Sheet Index:[{n}], Title:{sheet.name}, AutoFilterMode:',
+                      book.sheets[sheet.name].api.AutoFilterMode, ', FilterMode:',
+                      book.sheets[sheet.name].api.FilterMode)
+                try:
+                    book.sheets[n].api.ShowAllData()
+                    print(f'ShowAllData is active.')
+                except Exception as e:
+                    print(f'ShowAllData is not active.')
+
+            book.api.RefreshAll()
+            print(f"Finished refreshing {savefilename}")
+            book.api.Connections(1).OLEDBConnection.BackgroundQuery = True
+            book.save()
+            book.close()
     except Exception as e:
-        refreshlog.error(f'{filename} refresh failed due to {e}')
+        logger.error(f'{filename} refresh failed due to {e}')
         raise Exception(f'{filename} refresh failed due to {e}')
     else:
-        refreshlog.info(f'{filename} refresh success.')
+        logger.info(f'{filename} refresh success.')
 
 
 def lastModified(suffix=''):
@@ -142,7 +135,6 @@ def lastModified(suffix=''):
     # Convert seconds since epoch to readable timestamp
     modificationTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(modTimesinceEpoc))
     print(fileName, "was last Modified: ", modificationTime)
-    refreshlog.info(fileName + " was last Modified: " + modificationTime)
 
 
 def refreshModifiedcheck():
@@ -160,42 +152,48 @@ def refreshAll():
         check()
         refresh(filename='inventory')
     except Exception as e:
-        refreshlog.info(f'There was a problem with refreshing the inventory;\n{e}')
+        logger.info(f'There was a problem with refreshing the inventory;\n{e}')
 
     try:
         check()
         refresh(filename='student')
     except Exception as e:
-        refreshlog.info(f'There was a problem with refreshAll the Student File;\n{e}')
+        logger.info(f'There was a problem with refreshAll the Student File;\n{e}')
 
     try:
         check()
         refresh(filename='staff')
     except Exception as e:
-        refreshlog.info(f'here was a problem with refreshAll the Staff File;\n{e}')
+        logger.info(f'here was a problem with refreshAll the Staff File;\n{e}')
 
     try:
         check()
         refresh(filename='collections')
     except Exception as e:
-        refreshlog.info(f'There was a problem with refreshAll the Collections File;\n{e}')
+        logger.info(f'There was a problem with refreshAll the Collections File;\n{e}')
 
     try:
         check()
         refresh(filename='asap')
     except Exception as e:
-        refreshlog.info(f'There was a problem with refreshAll the ASAP Post File;\n{e}')
+        logger.info(f'There was a problem with refreshAll the ASAP Post File;\n{e}')
 
     try:
         check()
         refresh(filename='ccm')
     except Exception as e:
-        refreshlog.info(f'There was a problem with refreshAll the CCM Inventory File;\n{e}')
+        logger.info(f'There was a problem with refreshAll the CCM Inventory File;\n{e}')
 
 
 if __name__ == "__main__":
+    startTime = time.time()
+
     # refresh('staff')
     # refresh('collections')
     refreshAll()
     # t = threading.Thread(target=refresh('collections'))
     # t.start()
+
+    completeTime = (time.time() - startTime)
+    print('Completed Refresh')
+    print(int(completeTime / 60), 'minutes', int(completeTime) % 60, 'seconds to complete refresh.')

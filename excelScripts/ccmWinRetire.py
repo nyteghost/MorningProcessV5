@@ -3,7 +3,7 @@ import getpass
 import os
 import time
 from mpConfigs.logger_setup import fridaylog
-from mpConfigs.dbConfig import con_to_db
+from mpConfigs.dbConfig import dbConnect
 
 prefix = r"C:\Users"
 localuser = getpass.getuser()
@@ -13,7 +13,7 @@ out_path2 = prefix + "\\" + localuser + r"\Southeastern Computer Associates, LLC
 # logger = setup_logger('first_logger', 'Friday Process.log' ,0)
 
 
-conn = con_to_db("isolatedsafety")
+conn = dbConnect("isolatedsafety")
 
 data2 = pd.read_sql('EXEC uspRetWinLapPast7Days', conn)
 if not data2.empty:

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import getpass
-from alive_progress import alive_bar
+# from alive_progress import alive_bar
 import glob
 import shutil
 from datetime import date
@@ -79,24 +79,26 @@ for collections_fileName_relative in glob.glob('Z:/*Collections*', recursive=Tru
 
 
 
-    logging.info(
-        'Success: Deleting TEMPCollectionsData Table Content\nIN PROGRESS: Inserting Data from Excel Sheet into the Collections Dataframe.')
+    logging.info('Success: Deleting TEMPCollectionsData Table Content\nIN PROGRESS: Inserting Data from Excel Sheet into the Collections Dataframe.')
     logging.info(df)
 
     df.columns = df.columns.str.lower()
     print(df)
 
     connect = dbConnect("gcaassetmgmt_2_0")
-
     connect.df_to_sql(df, 'stage_collectionsdata')
 
-    connect.call('pers_uspupdatecollections')
-
-    # fileName_absolute = os.path.basename(collections_fileName_relative)
-    # new_name = "r" + str(Date) + 'r-' + fileName_absolute
-    # shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
-    # print(new_name + ' moved to Historical Folder.')
-    # logging.info(new_name + ' moved to Historical Folder.')
+    try:
+        tryCall = connect.call('pers_uspupdatecollections')
+    except Exception as e:
+        raise Exception(e)
+    else:
+        if tryCall:
+            fileName_absolute = os.path.basename(collections_fileName_relative)
+            new_name = "r" + str(Date) + 'r-' + fileName_absolute
+            shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
+            print(new_name + ' moved to Historical Folder.')
+            logging.info(new_name + ' moved to Historical Folder.')
 
     toc = time.time()
     print('Done in {:.4f} seconds'.format(toc - tic))

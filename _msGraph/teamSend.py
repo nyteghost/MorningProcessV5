@@ -1,15 +1,10 @@
-import time
 import requests
 import json
 import os
 from _msGraph.auth import getAuth
 from dotenv import load_dotenv
 import pandas as pd
-import imgkit
 import numpy as np
-
-import base64
-import datetime
 from pretty_html_table import build_table
 
 load_dotenv()

@@ -3,13 +3,13 @@ import getpass
 import os
 import time
 from mpConfigs.logger_setup import fridaylog
-from mpConfigs.dbConfig import con_to_db
+from mpConfigs.dbConfig import dbConnect
 
 prefix = r"C:\Users"
 localuser = getpass.getuser()
 out_path = prefix + "\\" + localuser + r"\Southeastern Computer Associates, LLC\GCA Deployment - Documents\Database\Automate Audit Win10L Returns"
 
-conn = con_to_db("isolatedsafety")
+conn = dbConnect("isolatedsafety")
 
 data = pd.read_sql('EXEC GCAAssetMGMT_2_0.Asset.uspRetWinLapPast7Days', conn)
 if not data.empty:

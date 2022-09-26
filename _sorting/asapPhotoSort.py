@@ -1,5 +1,4 @@
 import getpass
-from alive_progress import alive_bar
 import os
 from openpyxl import load_workbook
 import win32com.client

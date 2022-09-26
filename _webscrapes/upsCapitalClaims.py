@@ -23,7 +23,7 @@ print("Setting Profile for connection, please be patient")
 
 # Chrome Settings
 options = Options()
-# options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
+options.binary_location = "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
 options.add_argument("start-maximized")
 # Chrome Settings
 options.add_experimental_option("prefs", {

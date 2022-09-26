@@ -344,18 +344,24 @@ for student_fileName_relative in glob.glob(f'Z:/*SCA_22-23_Final*', recursive=Tr
         gcaAssetMGMT = dbConnect("gcaassetmgmt_2_0")
         gcaAssetMGMT.df_to_sql(df2, 'stage_studentdata')
 
-        gcaAssetMGMT.call('pers_uspupdatestudentdata')
-        gcaAssetMGMT.call('asset_uspreassigndevs2youngestest')
-        gcaAssetMGMT.call('asset_uspcbreassign2esfromwd')
-        gcaAssetMGMT.call('asset_uspes_sib_kitdist')
+        try:
+            tryCall1 = gcaAssetMGMT.call('pers_uspupdatestudentdata')
+            tryCall2 = gcaAssetMGMT.call('asset_uspreassigndevs2youngestest')
+            tryCall3 = gcaAssetMGMT.call('asset_uspcbreassign2esfromwd')
+            tryCall4 = gcaAssetMGMT.call('asset_uspes_sib_kitdist')
+        except Exception as e:
+            raise Exception(e)
+        else:
+            if tryCall1 & tryCall2 & tryCall3 & tryCall4:
+                fileName_absolute = os.path.basename(student_fileName_relative)
+                new_name = "r" + str(Date) + 'r-' + fileName_absolute
+                shutil.move(student_fileName_relative, 'Z:/Historical/' + new_name)
+                print(new_name + ' moved to Historical Folder.')
 
         toc = time.time()
         print('Done in {:.4f} seconds'.format(toc - tic))
 
         today = date.today()
         Date = today
-        #
-        # fileName_absolute = os.path.basename(student_fileName_relative)
-        # new_name = str(Date) + '-' + "nuStudentSheet.csv"
-        # shutil.move(student_fileName_relative, 'Z:/Historical/' + new_name)
-        # print(new_name + ' moved to Historical Folder.')
+
+

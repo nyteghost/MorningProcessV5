@@ -7,7 +7,8 @@ import better_exceptions
 import logging
 import time
 from mpConfigs.dbConfig import dbConnect
-
+import shutil
+import os
 better_exceptions.MAX_LENGTH = None
 better_exceptions.hook()
 
@@ -134,16 +135,20 @@ for staff_fileName_relative in glob.glob('Z:/*Staff*', recursive=True):
         for k, v in dtype.items():
             df[k] = df[k].astype(v, errors='ignore')
 
-        connect = dbConnect("gcaassetmgmt_2_0")
-        connect.df_to_sql(df, 'stage_staffdata')
-        connect.call('pers_uspupdatestaffdata')
-        # df.to_excel(staff_excel_output)
-
-        # fileName_absolute = os.path.basename(staff_fileName_relative)
-        # new_name = "r" + str(Date) + 'r-' + fileName_absolute
-        # shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
-        # print(new_name + ' moved to Historical Folder.')
-        # logging.info(new_name + ' moved to Historical Folder.')
+        try:
+            connect = dbConnect("gcaassetmgmt_2_0")
+            connect.df_to_sql(df, 'stage_staffdata')
+            tryCall = connect.call('pers_uspupdatestaffdata')
+            # df.to_excel(staff_excel_output)
+        except Exception as e:
+            raise Exception(e)
+        else:
+            if tryCall:
+                fileName_absolute = os.path.basename(staff_fileName_relative)
+                new_name = "r" + str(Date) + 'r-' + fileName_absolute
+                shutil.move('Z:/' + fileName_absolute, 'Z:/Historical/' + new_name)
+                print(new_name + ' moved to Historical Folder.')
+                logging.info(new_name + ' moved to Historical Folder.')
 
 
 toc = time.time()

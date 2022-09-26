@@ -6,7 +6,6 @@ import getpass
 import time
 from multiprocessing import Pool, Value, Lock
 import multiprocessing
-from alive_progress import alive_bar
 import sys
 from datetime import datetime
 

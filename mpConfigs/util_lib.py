@@ -106,7 +106,7 @@ def close():
 
 def check():
     wt = 0
-    while wt < 5:
+    while wt < 2:
         if checkIfProcessRunning():
             print(
                 'Previous Excel Refresh still running. I am going to go ahead and wait 15 seconds to make sure closed.')
@@ -116,7 +116,7 @@ def check():
         else:
             print('No excel process was running')
             break
-    if wt == 5:
+    if wt == 2:
         close()
 
 

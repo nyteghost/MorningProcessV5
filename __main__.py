@@ -63,6 +63,11 @@ failed_reason = []
 failedImports = []
 # skipped_list=[]
 
+racompletion_list = []
+rasuccess_list = []
+rafailed_list = []
+rafailed_reason = []
+
 # logger = logging.getLogger()
 # logger.setLevel(logging.INFO)
 
@@ -96,15 +101,18 @@ def preMorning():
             success_list.append('nuStudent Import')
             failed_list.append('')
             student_import = 1
+            refresh('student')
         else:
             excelDriveFiles.append('No nuStudent Sheet found.')
             logger.info("No nuStudent Test Sheet today.")
             studentStafflog.info('A Updated nuStudent Test Sheet was not found.')
-            failedImports.append("Student")
+            success_list.append('')
+            failed_list.append('nuStudent Import')
+            failed_reason.append("No nuStudent sheet Found in Z Drive")
+
     except Exception as ex:
         studentStafflog.info(str(ex))
         print(ex)
-        studentStafflog.error('Issue with nuStudent Test Sheet')
         logger.info('nuStudent Test Sheet Import Failed')
         success_list.append('')
         failed_list.append('nuStudent Test Sheet Import')
@@ -124,8 +132,9 @@ def preMorning():
         else:
             excelDriveFiles.append('No Staff Sheet found.')
             logger.info("No Staff Sheet today.")
-            studentStafflog.info('A Updated Staff Sheet was not found.')
-            failedImports.append("Staff")
+            success_list.append('')
+            failed_list.append('Staff Import')
+            failed_reason.append("No Staff sheet Found in ZDrive")
     except Exception as ex:
         studentStafflog.error(ex)
         studentStafflog.error('Issue with Staff Sheet')
@@ -148,8 +157,9 @@ def preMorning():
         else:
             excelDriveFiles.append('No Collections Sheet found.')
             logger.info("No Collections Sheet today.")
-            collectionslog.info('A Updated Collections Sheet was not found.')
-            failedImports.append("Collections")
+            success_list.append('')
+            failed_list.append('Collections Import')
+            failed_reason.append("No Collections sheet Found in ZDrive")
     except Exception as ex:
         collectionslog.error(ex)
         collectionslog.error('Issue with Collections Sheet')
@@ -159,7 +169,7 @@ def preMorning():
         failed_reason.append("Collections Import: " + str(e))
         pass
 
-    if failedImports:
+    if 'No nuStudent sheet Found in Z Drive' in failed_reason and 'No Staff sheet Found in ZDrive' in failed_reason and 'No Collections sheet Found in ZDrive' in failed_reason:
         reportError = TeamsChat('mpReport')
         for drive in "Z":
             drive += ':'
@@ -176,8 +186,20 @@ def preMorning():
                 reportError.send(f'Python was unable to discover the {drive} drive. ', 'Josh')
             else:
                 # reportError.send('This is a test of the reporting system.')
-                reportError.send(f'Missing {failedImports} from {drive} Drive.', 'Josh')
+                reportError.send(f'No Student, Staff, or Collections Sheet found in {drive} Drive.', 'Josh')
             reportError.send(f'Please hold off until the imports are complete!', 'Elijah')
+    else:
+        if 'No nuStudent sheet Found in Z Drive' in failed_reason:
+            reportError = TeamsChat('mpReport')
+            reportError.send(f'Student Sheet not found. Please hold off until the imports are complete!', 'Elijah')
+
+        if 'No Staff sheet Found in ZDrive' in failed_reason:
+            reportError = TeamsChat('mpReport')
+            reportError.send(f'Staff Sheet not found. Please hold off until the imports are complete!', 'Elijah')
+
+        if 'No Collections sheet Found in ZDrive' in failed_reason:
+            reportError = TeamsChat('mpReport')
+            reportError.send(f'Collections Sheet not found. Please hold off until the imports are complete!', 'Elijah')
 
     return student_import, staff_import, collections_import
 
@@ -346,111 +368,118 @@ def refresh_process(student_import, staff_import, collection_import):
         refresh(filename='inventory')
     except Exception as e:
         logger.error(f'There was a problem with refreshing GCA Inventory File.;\n{e}')
-        success_list.append('')
-        failed_list.append(f' GCA Inventory  RefreshAll')
-        failed_reason.append("UPS Outbound Database Import: " + str(e))
+        rasuccess_list.append('')
+        rafailed_list.append(f' GCA Inventory  RefreshAll')
+        rafailed_reason.append("UPS Outbound Database Import: " + str(e))
     else:
         logger.info(f'Refreshing GCA Inventory success.')
-        success_list.append(f'GCA Inventory  RefreshAll')
-        failed_list.append('')
+        rasuccess_list.append(f'GCA Inventory  RefreshAll')
+        rafailed_list.append('')
 
     if student_import == 1:
         try:
             refresh(filename='student')
         except Exception as e:
             logger.error(f'There was a problem with refreshing Student File;\n{e}')
-            success_list.append('')
-            failed_list.append(f'Student RefreshAll')
-            failed_reason.append("Student Refreshall: " + str(e))
+            rasuccess_list.append('')
+            rafailed_list.append(f'Student RefreshAll')
+            rafailed_reason.append("Student Refreshall: " + str(e))
         else:
             logger.info(f'Refreshing Student success.')
-            success_list.append(f'Student RefreshAll')
-            failed_list.append('')
+            rasuccess_list.append(f'Student RefreshAll')
+            rafailed_list.append('')
     else:
         # skipped_list.append('Student RefreshAll')
-        failed_list.append(f'')
+        rafailed_list.append(f'')
 
     if staff_import == 1:
         try:
             refresh(filename='staff')
         except Exception as e:
             logger.error(f'here was a problem with refreshing the Staff File;\n{e}')
-            success_list.append('')
-            failed_list.append(f'Staff RefreshAll')
-            failed_reason.append("Staff RefreshAll: " + str(e))
+            rasuccess_list.append('')
+            rafailed_list.append(f'Staff RefreshAll')
+            rafailed_reason.append("Staff RefreshAll: " + str(e))
         else:
             logger.info(f'Refreshing Staff success.')
-            success_list.append(f'Staff RefreshAll')
-            failed_list.append('')
+            rasuccess_list.append(f'Staff RefreshAll')
+            rafailed_list.append('')
     else:
         # skipped_list.append('Staff RefreshAll')
-        failed_list.append(f'')
+        rafailed_list.append(f'')
 
     if collection_import == 1:
         try:
             refresh(filename='collections')
         except Exception as e:
             logger.error(f'There was a problem with refreshing the Collections File;\n{e}')
-            success_list.append('')
-            failed_list.append(f'Collections RefreshAll')
-            failed_reason.append("Collectiosn RefreshAll: " + str(e))
+            rasuccess_list.append('')
+            rafailed_list.append(f'Collections RefreshAll')
+            rafailed_reason.append("Collectiosn RefreshAll: " + str(e))
         else:
             logger.info(f'Refreshing Collections success.')
-            success_list.append(f'Collections RefreshAll')
-            failed_list.append('')
+            rasuccess_list.append(f'Collections RefreshAll')
+            rafailed_list.append('')
     else:
         # skipped_list.append('Collections RefreshAll')
-        failed_list.append(f'')
+        rafailed_list.append(f'')
 
     try:
         refresh(filename='asap')
     except Exception as e:
         logger.error(f'There was a problem with refreshing the ASAP Post File;\n{e}')
-        success_list.append('')
-        failed_list.append(f'ASAP RefreshAll')
-        failed_reason.append("ASAP RefreshAll: " + str(e))
+        rasuccess_list.append('')
+        rafailed_list.append(f'ASAP RefreshAll')
+        rafailed_reason.append("ASAP RefreshAll: " + str(e))
     else:
         logger.info(f'Refreshing ASAP Post success.')
-        success_list.append(f'ASAP RefreshAll')
-        failed_list.append('')
+        rasuccess_list.append(f'ASAP RefreshAll')
+        rafailed_list.append('')
 
     try:
         refresh(filename='ccm')
     except Exception as e:
         logger.error(f'There was a problem with refreshing the CCM Inventory File;\n{e}')
-        success_list.append('')
-        failed_list.append(f'CCM Inventory RefreshAll')
-        failed_reason.append("CCM Inventory RefreshAll: " + str(e))
+        rasuccess_list.append('')
+        rafailed_list.append(f'CCM Inventory RefreshAll')
+        rafailed_reason.append("CCM Inventory RefreshAll: " + str(e))
     else:
         logger.info(f'Refreshing CCM Inventory success.')
-        success_list.append(f'CCM Inventory RefreshAll')
-        failed_list.append('')
+        rasuccess_list.append(f'CCM Inventory RefreshAll')
+        rafailed_list.append('')
 
     try:
         refresh(filename='cbenroll')
     except Exception as e:
         logger.error(f'There was a problem with refreshing the CB Enroll Issues File;\n{e}')
-        success_list.append('')
-        failed_list.append(f'CB Enroll Issues RefreshAll')
-        failed_reason.append("CB Enroll Issues RefreshAll: " + str(e))
+        rasuccess_list.append('')
+        rafailed_list.append(f'CB Enroll Issues RefreshAll')
+        rafailed_reason.append("CB Enroll Issues RefreshAll: " + str(e))
     else:
         logger.info(f'Refreshing CB Enroll Issues success.')
-        success_list.append(f'CB Enroll Issues RefreshAll')
-        failed_list.append('')
+        rasuccess_list.append(f'CB Enroll Issues RefreshAll')
+        rafailed_list.append('')
 
-    # Verify All refreshed
+    ### Verify All refreshed
     try:
         refreshModifiedcheck()
     except Exception as e:
         logger.error(f'lastModified function failed due to {e}')
-        success_list.append('')
-        failed_list.append(f'Last Modified Refresh')
-        failed_reason.append("Last Modified Refresh: " + str(e))
+        rasuccess_list.append('')
+        rafailed_list.append(f'Last Modified Refresh')
+        rafailed_reason.append("Last Modified Refresh: " + str(e))
     else:
         logger.info(f'lastModified success.')
-        success_list.append(f'Last Modified Refresh')
-        failed_list.append('')
+        rasuccess_list.append(f'Last Modified Refresh')
+        rafailed_list.append('')
 
+
+def runTheRefreshes():
+    if dt.time() < datetime.time(10, 59):
+        refresh_process(1, 1, 1)
+    else:
+        refresh_process(0, 0, 0)
+    ratoTeams()
 
 def temp_imports():
     # try:
@@ -495,6 +524,7 @@ def temp_imports():
 def main():
     # MAIN RUN
     cleanUp()
+    check()
     if day != 6:
         if day != 0 and dt.time() < datetime.time(8, 30):
             try:
@@ -526,7 +556,6 @@ def main():
             student_import, staff_import, collect_import = preMorning()
             main_imports()
             # temp_imports()
-            refresh_process(student_import, staff_import, collect_import)
         elif datetime.time(11, 0) < dt.time() < datetime.time(15, 0):
             main_imports()
             try:
@@ -540,9 +569,8 @@ def main():
                 logger.info(f'T-Mobile Subscriber Report Import success.')
                 success_list.append(f'T-Mobile Subscriber Report Import')
                 failed_list.append('')
-            refresh_process(0, 0, 0)
         elif dt.time() > datetime.time(17, 30):
-            refresh_process(0, 0, 0)
+            runTheRefreshes()
 
         if day == 4:
             if time_in_range(day_start, middle, current):
@@ -640,7 +668,12 @@ def toTeams():
     if failed_reason:
         mpReport.send("Failure Reason</br>" + "</br>".join(failed_reason))
 
-
+def ratoTeams():
+    racompletion_df = pd.DataFrame(list(zip(rasuccess_list, rafailed_list)), columns=['Passed', 'Failed'])
+    print('sendTable')
+    mpReport.sendTable("Refresh All Completion", 5, racompletion_df)
+    if rafailed_reason:
+        mpReport.send("Failure Reason</br>"+"</br>".join(rafailed_reason))
 def asap_image_rename_email(status):
     time_now = localtime = time.asctime(time.localtime(time.time()))
     sender_email = "mbrownscaadmin@georgiacyber.org"

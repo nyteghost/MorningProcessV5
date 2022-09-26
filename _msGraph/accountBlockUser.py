@@ -1,13 +1,9 @@
 import requests
-import msal
-import atexit
 import pandas as pd
 from connectpyse.service import ticket_notes_api, ticket_note, ticket, tickets_api
 from connectpyse.schedule import schedule_entries_api, schedule_entry
-import os
 from datetime import date
 from mpConfigs.doorKey import config
-from mpConfigs.logger_setup import setup_logger, log_location
 from mpConfigs.dbConfig import dbConnect
 from _msGraph.auth import getAuth
 
